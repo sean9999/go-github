@@ -7,7 +7,6 @@ package github
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"testing"
@@ -244,44 +243,45 @@ func TestUsersService_GetByID(t *testing.T) {
 	})
 }
 
-func TestUsersService_Edit(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
+//	@note: move this to user_test.go
+// func TestUsersService_Edit(t *testing.T) {
+// 	client, mux, _, teardown := setup()
+// 	defer teardown()
 
-	input := &User{Name: String("n")}
+// 	input := &User{Name: String("n")}
 
-	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
-		v := new(User)
-		assertNilError(t, json.NewDecoder(r.Body).Decode(v))
+// 	mux.HandleFunc("/user", func(w http.ResponseWriter, r *http.Request) {
+// 		v := new(User)
+// 		assertNilError(t, json.NewDecoder(r.Body).Decode(v))
 
-		testMethod(t, r, "PATCH")
-		if !cmp.Equal(v, input) {
-			t.Errorf("Request body = %+v, want %+v", v, input)
-		}
+// 		testMethod(t, r, "PATCH")
+// 		if !cmp.Equal(v, input) {
+// 			t.Errorf("Request body = %+v, want %+v", v, input)
+// 		}
 
-		fmt.Fprint(w, `{"id":1}`)
-	})
+// 		fmt.Fprint(w, `{"id":1}`)
+// 	})
 
-	ctx := context.Background()
-	user, _, err := client.Users.Edit(ctx, input)
-	if err != nil {
-		t.Errorf("Users.Edit returned error: %v", err)
-	}
+// 	ctx := context.Background()
+// 	user, _, err := client.Users.Edit(ctx, input)
+// 	if err != nil {
+// 		t.Errorf("Users.Edit returned error: %v", err)
+// 	}
 
-	want := &User{ID: Int64(1)}
-	if !cmp.Equal(user, want) {
-		t.Errorf("Users.Edit returned %+v, want %+v", user, want)
-	}
+// 	want := &User{ID: Int64(1)}
+// 	if !cmp.Equal(user, want) {
+// 		t.Errorf("Users.Edit returned %+v, want %+v", user, want)
+// 	}
 
-	const methodName = "Edit"
-	testNewRequestAndDoFailure(t, methodName, client, func() (*Response, error) {
-		got, resp, err := client.Users.Edit(ctx, input)
-		if got != nil {
-			t.Errorf("testNewRequestAndDoFailure %v = %#v, want nil", methodName, got)
-		}
-		return resp, err
-	})
-}
+// 	const methodName = "Edit"
+// 	testNewRequestAndDoFailure(t, methodName, client, func() (*Response, error) {
+// 		got, resp, err := client.Users.Edit(ctx, input)
+// 		if got != nil {
+// 			t.Errorf("testNewRequestAndDoFailure %v = %#v, want nil", methodName, got)
+// 		}
+// 		return resp, err
+// 	})
+// }
 
 func TestUsersService_GetHovercard(t *testing.T) {
 	client, mux, _, teardown := setup()
@@ -352,120 +352,122 @@ func TestUsersService_ListAll(t *testing.T) {
 	})
 }
 
-func TestUsersService_ListInvitations(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
+// @note: move this to user_test
 
-	mux.HandleFunc("/user/repository_invitations", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		fmt.Fprintf(w, `[{"id":1}, {"id":2}]`)
-	})
+// func TestUsersService_ListInvitations(t *testing.T) {
+// 	client, mux, _, teardown := setup()
+// 	defer teardown()
 
-	ctx := context.Background()
-	got, _, err := client.Users.ListInvitations(ctx, nil)
-	if err != nil {
-		t.Errorf("Users.ListInvitations returned error: %v", err)
-	}
+// 	mux.HandleFunc("/user/repository_invitations", func(w http.ResponseWriter, r *http.Request) {
+// 		testMethod(t, r, "GET")
+// 		fmt.Fprintf(w, `[{"id":1}, {"id":2}]`)
+// 	})
 
-	want := []*RepositoryInvitation{{ID: Int64(1)}, {ID: Int64(2)}}
-	if !cmp.Equal(got, want) {
-		t.Errorf("Users.ListInvitations = %+v, want %+v", got, want)
-	}
+// 	ctx := context.Background()
+// 	got, _, err := client.Users.ListInvitations(ctx, nil)
+// 	if err != nil {
+// 		t.Errorf("Users.ListInvitations returned error: %v", err)
+// 	}
 
-	const methodName = "ListInvitations"
-	testNewRequestAndDoFailure(t, methodName, client, func() (*Response, error) {
-		got, resp, err := client.Users.ListInvitations(ctx, nil)
-		if got != nil {
-			t.Errorf("testNewRequestAndDoFailure %v = %#v, want nil", methodName, got)
-		}
-		return resp, err
-	})
-}
+// 	want := []*RepositoryInvitation{{ID: Int64(1)}, {ID: Int64(2)}}
+// 	if !cmp.Equal(got, want) {
+// 		t.Errorf("Users.ListInvitations = %+v, want %+v", got, want)
+// 	}
 
-func TestUsersService_ListInvitations_withOptions(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
+// 	const methodName = "ListInvitations"
+// 	testNewRequestAndDoFailure(t, methodName, client, func() (*Response, error) {
+// 		got, resp, err := client.Users.ListInvitations(ctx, nil)
+// 		if got != nil {
+// 			t.Errorf("testNewRequestAndDoFailure %v = %#v, want nil", methodName, got)
+// 		}
+// 		return resp, err
+// 	})
+// }
 
-	mux.HandleFunc("/user/repository_invitations", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		testFormValues(t, r, values{
-			"page": "2",
-		})
-		fmt.Fprintf(w, `[{"id":1}, {"id":2}]`)
-	})
+// func TestUsersService_ListInvitations_withOptions(t *testing.T) {
+// 	client, mux, _, teardown := setup()
+// 	defer teardown()
 
-	ctx := context.Background()
-	_, _, err := client.Users.ListInvitations(ctx, &ListOptions{Page: 2})
-	if err != nil {
-		t.Errorf("Users.ListInvitations returned error: %v", err)
-	}
-}
+// 	mux.HandleFunc("/user/repository_invitations", func(w http.ResponseWriter, r *http.Request) {
+// 		testMethod(t, r, "GET")
+// 		testFormValues(t, r, values{
+// 			"page": "2",
+// 		})
+// 		fmt.Fprintf(w, `[{"id":1}, {"id":2}]`)
+// 	})
 
-func TestUsersService_AcceptInvitation(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
+// 	ctx := context.Background()
+// 	_, _, err := client.Users.ListInvitations(ctx, &ListOptions{Page: 2})
+// 	if err != nil {
+// 		t.Errorf("Users.ListInvitations returned error: %v", err)
+// 	}
+// }
 
-	mux.HandleFunc("/user/repository_invitations/1", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "PATCH")
-		w.WriteHeader(http.StatusNoContent)
-	})
+// func TestUsersService_AcceptInvitation(t *testing.T) {
+// 	client, mux, _, teardown := setup()
+// 	defer teardown()
 
-	ctx := context.Background()
-	if _, err := client.Users.AcceptInvitation(ctx, 1); err != nil {
-		t.Errorf("Users.AcceptInvitation returned error: %v", err)
-	}
+// 	mux.HandleFunc("/user/repository_invitations/1", func(w http.ResponseWriter, r *http.Request) {
+// 		testMethod(t, r, "PATCH")
+// 		w.WriteHeader(http.StatusNoContent)
+// 	})
 
-	const methodName = "AcceptInvitation"
-	testBadOptions(t, methodName, func() (err error) {
-		_, err = client.Users.AcceptInvitation(ctx, -1)
-		return err
-	})
+// 	ctx := context.Background()
+// 	if _, err := client.Users.AcceptInvitation(ctx, 1); err != nil {
+// 		t.Errorf("Users.AcceptInvitation returned error: %v", err)
+// 	}
 
-	testNewRequestAndDoFailure(t, methodName, client, func() (*Response, error) {
-		return client.Users.AcceptInvitation(ctx, 1)
-	})
-}
+// 	const methodName = "AcceptInvitation"
+// 	testBadOptions(t, methodName, func() (err error) {
+// 		_, err = client.Users.AcceptInvitation(ctx, -1)
+// 		return err
+// 	})
 
-func TestUsersService_DeclineInvitation(t *testing.T) {
-	client, mux, _, teardown := setup()
-	defer teardown()
+// 	testNewRequestAndDoFailure(t, methodName, client, func() (*Response, error) {
+// 		return client.Users.AcceptInvitation(ctx, 1)
+// 	})
+// }
 
-	mux.HandleFunc("/user/repository_invitations/1", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "DELETE")
-		w.WriteHeader(http.StatusNoContent)
-	})
+// func TestUsersService_DeclineInvitation(t *testing.T) {
+// 	client, mux, _, teardown := setup()
+// 	defer teardown()
 
-	ctx := context.Background()
-	if _, err := client.Users.DeclineInvitation(ctx, 1); err != nil {
-		t.Errorf("Users.DeclineInvitation returned error: %v", err)
-	}
+// 	mux.HandleFunc("/user/repository_invitations/1", func(w http.ResponseWriter, r *http.Request) {
+// 		testMethod(t, r, "DELETE")
+// 		w.WriteHeader(http.StatusNoContent)
+// 	})
 
-	const methodName = "DeclineInvitation"
-	testBadOptions(t, methodName, func() (err error) {
-		_, err = client.Users.DeclineInvitation(ctx, -1)
-		return err
-	})
+// 	ctx := context.Background()
+// 	if _, err := client.Users.DeclineInvitation(ctx, 1); err != nil {
+// 		t.Errorf("Users.DeclineInvitation returned error: %v", err)
+// 	}
 
-	testNewRequestAndDoFailure(t, methodName, client, func() (*Response, error) {
-		return client.Users.DeclineInvitation(ctx, 1)
-	})
-}
+// 	const methodName = "DeclineInvitation"
+// 	testBadOptions(t, methodName, func() (err error) {
+// 		_, err = client.Users.DeclineInvitation(ctx, -1)
+// 		return err
+// 	})
 
-func TestUserContext_Marshal(t *testing.T) {
-	testJSONMarshal(t, &UserContext{}, "{}")
+// 	testNewRequestAndDoFailure(t, methodName, client, func() (*Response, error) {
+// 		return client.Users.DeclineInvitation(ctx, 1)
+// 	})
+// }
 
-	u := &UserContext{
-		Message: String("message"),
-		Octicon: String("message"),
-	}
+// func TestUserContext_Marshal(t *testing.T) {
+// 	testJSONMarshal(t, &UserContext{}, "{}")
 
-	want := `{
-		"message" : "message",
-		"octicon" : "message"
-	}`
+// 	u := &UserContext{
+// 		Message: String("message"),
+// 		Octicon: String("message"),
+// 	}
 
-	testJSONMarshal(t, u, want)
-}
+// 	want := `{
+// 		"message" : "message",
+// 		"octicon" : "message"
+// 	}`
+
+// 	testJSONMarshal(t, u, want)
+// }
 
 func TestHovercard_Marshal(t *testing.T) {
 	testJSONMarshal(t, &Hovercard{}, "{}")

@@ -207,6 +207,7 @@ type Client struct {
 	SecurityAdvisories *SecurityAdvisoriesService
 	Teams              *TeamsService
 	Users              *UsersService
+	Self               *SelfService
 }
 
 type service struct {
@@ -424,6 +425,7 @@ func (c *Client) initialize() {
 	c.SecurityAdvisories = (*SecurityAdvisoriesService)(&c.common)
 	c.Teams = (*TeamsService)(&c.common)
 	c.Users = (*UsersService)(&c.common)
+	c.Self = (*SelfService)(c.Self)
 }
 
 // copy returns a copy of the current client. It must be initialized before use.
